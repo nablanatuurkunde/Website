@@ -1,0 +1,233 @@
+/* Nabla on the web. Black and white like the videos, hierarchy by size and weight instead of grey, brand yellow
+   as the one accent (time codes, the active chapter, the main button). Formulas in Computer Modern (KaTeX) on
+   white boards, as on the rekenbord in the videos; U, I, R, P, E and Q keep their colour. The five brand
+   colours together appear only in the logo. */
+@font-face {
+  font-family: "Bricolage Grotesque"; font-weight: 200 800; font-stretch: 75% 100%; font-display: swap;
+  src: url(../assets/fonts/bricolage-grotesque.woff2) format("woff2-variations");
+}
+@font-face {
+  font-family: Geist; font-weight: 100 900; font-display: swap;
+  src: url(../assets/fonts/geist.woff2) format("woff2-variations");
+}
+
+:root {
+  --black: #000; --white: #fff; --yellow: #FFB31F;
+  --display: "Bricolage Grotesque", "Arial Narrow", sans-serif;
+  --body: Geist, system-ui, sans-serif;
+  /* a perfect-fourth scale on 17px */
+  --s-1: 0.8125rem; --s0: 1.0625rem; --s1: 1.4rem; --s2: 1.875rem; --s3: 2.5rem; --s4: clamp(2.75rem, 7vw, 5.5rem);
+  --gutter: clamp(1.25rem, 4vw, 3.5rem);
+  --wide: 84rem;
+  --line: 1.5px;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html { background: var(--black); scroll-behavior: smooth; }
+body {
+  margin: 0; min-height: 100vh; display: flex; flex-direction: column; overflow-x: clip;
+  color: var(--white); font: 400 var(--s0)/1.55 var(--body); -webkit-font-smoothing: antialiased;
+}
+canvas.field { position: fixed; inset: 0; width: 100%; height: 100%; z-index: -1; }
+main { flex: 1; }
+h1, h2, h3 { font-family: var(--display); font-weight: 800; line-height: 0.95; letter-spacing: -0.02em; margin: 0; }
+p { margin: 0; max-width: 60ch; }
+a { color: inherit; text-underline-offset: 0.2em; text-decoration-thickness: 1px; }
+:focus-visible { outline: 2px solid var(--yellow); outline-offset: 3px; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.wrap { width: 100%; max-width: var(--wide); margin: 0 auto; padding: 0 var(--gutter); }
+.time { font-variant-numeric: tabular-nums; color: var(--yellow); }
+
+/* ── Header and footer ───────────────────────────────────────────────── */
+.site-header { display: flex; flex-wrap: wrap; align-items: center; gap: 0.75rem 2rem; padding-block: 1.1rem; }
+.site-header nav { display: flex; gap: 1.25rem 1.75rem; margin-left: auto; font-weight: 500; white-space: nowrap; }
+.site-header nav a { text-decoration: none; }
+.site-header nav a:hover, .site-header nav a[aria-current="page"] { text-decoration: underline; }
+.site-header .brand .logo { width: clamp(6.5rem, 22vw, 8.5rem); }
+.site-footer { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 1rem; padding-block: 3rem 2rem; font-size: var(--s-1); }
+.site-footer .links { display: flex; gap: 1.5rem; }
+
+/* ── The logo: word mark and ∇ as in the intro. Values are pixels of the 8000 × 4000 logo artboard; --dx and --wdx
+      are how far the ∇ and the word have slid (the defaults: where they end up), --s the size of the ∇. ── */
+.logo {
+  --dx: 2709.5; --wdx: -3637.8; --s: 1;
+  display: block; position: relative; aspect-ratio: 7701.5 / 1707; width: min(84vw, 56rem);
+}
+.logo img { position: absolute; top: 0; height: 100%; user-select: none; -webkit-user-drag: none; }
+.logo .nabla {
+  left: calc((860 + 1959) / 7701.5 * 100%); width: calc(2173 / 7701.5 * 100%);
+  transform-origin: calc((1950 - 860) / 2173 * 100%) 50%; /* the middle of the ∇ */
+  transform: translateX(calc(var(--dx) / 2173 * 100%)) scale(var(--s));
+}
+.logo .word {
+  left: calc((1678.8 + 1959) / 7701.5 * 100%); width: calc(6206 / 7701.5 * 100%);
+  transform: translateX(calc(var(--wdx) / 6206 * 100%));
+  /* hidden right of the ∇'s slanted left edge (x = 860 at the top, 1574 at the bottom): it slides out from behind.
+     max(): before the word comes out the polygon would fold over and leave a hairline */
+  clip-path: polygon(0 0, max(0%, (860 + var(--dx) - 1678.8 - var(--wdx)) / 6206 * 100%) 0,
+                     max(0%, (1574 + var(--dx) - 1678.8 - var(--wdx)) / 6206 * 100%) 100%, 0 100%);
+}
+
+/* ── Buttons ─────────────────────────────────────────────────────────── */
+.button {
+  display: inline-flex; align-items: center; gap: 0.6em; padding: 0.8rem 1.4rem; border: 0; cursor: pointer;
+  background: var(--yellow); color: var(--black); font: 700 var(--s0)/1 var(--body); text-decoration: none;
+}
+.button:hover { background: var(--white); }
+.button.quiet { background: none; color: var(--white); box-shadow: inset 0 0 0 var(--line) var(--white); }
+.button.quiet:hover { background: var(--white); color: var(--black); }
+
+/* ── Home: the intro, then a row per video ─────────────────────────────── */
+.hero {
+  min-height: calc(100svh - 5rem); display: grid; place-content: center; justify-items: center; text-align: center;
+  gap: 2.25rem; padding-bottom: 5rem;
+  overflow: clip; /* the word sticks out while it slides: a phone would widen the whole page for it and zoom out */
+}
+.hero .tagline { font: 600 var(--s2)/1.1 var(--display); letter-spacing: -0.01em; max-width: none; }
+.hero .actions { display: flex; flex-wrap: wrap; gap: 0.75rem; justify-content: center; margin-top: 1.5rem; }
+/* during the intro: only the field and the logo; the rest comes in after it */
+.intro .site-header, .intro .after-logo, .intro .site-footer, .intro #videos { opacity: 0; }
+.site-header, .after-logo, .site-footer, #videos { transition: opacity 1s; }
+
+#videos { scroll-margin-top: 1rem; }
+.video-row { padding-block: 3.5rem; }
+.video-row + .video-row { border-top: var(--line) solid var(--white); }
+/* a row per video: the preview window on the left, title and text beside it, the chapters underneath.
+   The same columns in every row, so all texts start on one line. */
+.row-head { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); align-items: center; gap: 1.5rem 3rem; margin-bottom: 2rem; }
+.row-head h2 { font-size: clamp(2.25rem, 4.5vw, 4rem); }
+.row-head h2 a { text-decoration: none; }
+.row-head h2 a:hover { text-decoration: underline; text-decoration-thickness: 3px; }
+.row-head .about { display: grid; gap: 1rem; justify-items: start; max-width: 32rem; }
+.row-head .meta { font-weight: 600; }
+.planned .row-head { margin: 0; }
+.planned .soon { color: var(--yellow); font-weight: 600; }
+
+/* the preview: a thumbnail, or a black frame with the background dots and the ∇, like the start of a video */
+.preview {
+  position: relative; display: block; aspect-ratio: 16 / 9; overflow: hidden; background: var(--black);
+  background-image: radial-gradient(circle, rgba(128, 128, 128, 0.5) 1.2px, transparent 1.7px); background-size: 22px 22px;
+}
+.preview img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.preview .mark { position: absolute; inset: 0; margin: auto; width: auto; height: 32%; object-fit: contain; }
+a.preview:hover { outline: 3px solid var(--black); outline-offset: 3px; }
+.preview .badge { position: absolute; left: 1rem; bottom: 0.9rem; padding: 0.2rem 0.6rem; background: var(--yellow); color: var(--black); font-size: var(--s-1); font-weight: 700; }
+.preview .play { position: absolute; left: 1rem; bottom: 1rem; width: 3.25rem; height: 3.25rem; background: var(--yellow); }
+.preview .play::after { content: ""; position: absolute; inset: 0; margin: auto; width: 1.1rem; height: 1.3rem; background: var(--black); clip-path: polygon(0 0, 100% 50%, 0 100%); transform: translateX(0.12rem); }
+
+/* the chapters as a strip of 16:9 tiles that scrolls sideways */
+.strip {
+  list-style: none; margin-block: 0; display: grid; grid-auto-flow: column; grid-auto-columns: clamp(15rem, 27vw, 21rem); gap: 1rem;
+  overflow-x: auto; scroll-snap-type: x mandatory; padding-bottom: 1rem; margin-inline: calc(-1 * var(--gutter));
+  padding-inline: var(--gutter); scroll-padding-inline: var(--gutter); scrollbar-color: var(--white) transparent; scrollbar-width: thin;
+}
+.tile {
+  position: relative; /* holds KaTeX's hidden (absolute) MathML: it would escape the strip and widen the page on a phone */
+  aspect-ratio: 16 / 9; display: grid; grid-template-rows: auto 1fr auto; padding: 0.9rem 1rem;
+  background: var(--black); box-shadow: inset 0 0 0 var(--line) var(--white); text-decoration: none;
+}
+.strip li { scroll-snap-align: start; }
+.tile:hover { box-shadow: inset 0 0 0 3px var(--yellow); }
+.tile .top { display: flex; justify-content: space-between; align-items: baseline; }
+.tile .number { font: 800 var(--s2)/1 var(--display); }
+.tile .formula { place-self: center; font-size: 1.45rem; }
+.tile h3 { font-size: var(--s1); line-height: 1.05; letter-spacing: -0.01em; }
+
+/* .paper: below the top of a page it turns to white board, a calm, opaque surface over the moving field.
+   Yellow text is too faint on white, so here time codes go black and yellow only fills the button. */
+.paper { background: var(--white); color: var(--black); padding-block: 1rem; }
+.paper :focus-visible { outline-color: var(--black); }
+.paper .video-row + .video-row { border-top-color: var(--black); }
+.paper .time { color: var(--black); font-weight: 600; }
+.paper .button:hover { background: var(--black); color: var(--white); }
+.paper .planned .soon { color: var(--black); font-weight: 700; }
+.paper .strip { scrollbar-color: var(--black) transparent; }
+.paper .tile { background: var(--white); box-shadow: inset 0 0 0 var(--line) var(--black); }
+.paper .tile:hover { box-shadow: inset 0 0 0 3px var(--black); }
+
+/* ── One video ───────────────────────────────────────────────────────── */
+.video-page h1 { font-size: var(--s4); margin: 2.5rem 0 0.75rem; }
+.video-page .lead { font-size: var(--s1); line-height: 1.4; margin-bottom: 4rem; }
+.watch { display: grid; grid-template-columns: minmax(0, 1fr) 22rem; gap: 1.5rem; align-items: start; }
+.player { aspect-ratio: 16 / 9; display: grid; place-items: center; box-shadow: inset 0 0 0 var(--line) var(--white); }
+.player iframe { width: 100%; height: 100%; border: 0; }
+.player p { font: 700 var(--s1) var(--display); text-align: center; padding: 1rem; }
+.chapters { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.25rem; }
+.chapters button {
+  width: 100%; display: grid; grid-template-columns: 4.2rem 1fr; gap: 0.5rem; text-align: left; cursor: pointer;
+  padding: 0.7rem 0.9rem; border: 0; background: none; color: var(--white); font: 500 var(--s0)/1.3 var(--body);
+}
+.chapters button:hover { box-shadow: inset 0 0 0 var(--line) var(--white); }
+.chapters button[aria-current="true"] { background: var(--white); color: var(--black); box-shadow: inset 6px 0 0 var(--yellow); }
+.chapters button[aria-current="true"] .time { color: var(--black); font-weight: 700; }
+.chapter-detail { margin-top: 3.5rem; display: grid; grid-template-columns: minmax(0, 22rem) 1fr; gap: 1.5rem 3rem; }
+.chapter-detail h2 { font-size: var(--s3); margin-bottom: 0.8rem; }
+.icon-button {
+  display: inline-grid; place-items: center; width: 2.4rem; height: 2.4rem; padding: 0; border: 0; cursor: pointer;
+  vertical-align: 0.05em; margin-left: 0.5rem; /* flows right after the last word of the title */
+  background: none; color: var(--white); box-shadow: inset 0 0 0 var(--line) var(--white);
+}
+.icon-button:hover { background: var(--white); color: var(--black); }
+.copied { font: 600 var(--s-1) var(--body); letter-spacing: 0; color: var(--yellow); margin-left: 0.5rem; vertical-align: 0.45em; }
+
+/* the video page on white: the player as a black frame like the previews, the chapter list inverted */
+.paper .video-page { padding-block: 3rem 4rem; }
+.paper .player {
+  box-shadow: none; background: var(--black); color: var(--white);
+  background-image: radial-gradient(circle, rgba(128, 128, 128, 0.5) 1.2px, transparent 1.7px); background-size: 22px 22px;
+}
+.paper .chapters button { color: var(--black); }
+.paper .chapters button:hover { box-shadow: inset 0 0 0 var(--line) var(--black); }
+.paper .chapters button[aria-current="true"] { background: var(--black); color: var(--white); box-shadow: inset 6px 0 0 var(--yellow); }
+.paper .chapters button[aria-current="true"] .time { color: var(--yellow); }
+.paper .icon-button { color: var(--black); box-shadow: inset 0 0 0 var(--line) var(--black); }
+.paper .icon-button:hover { background: var(--black); color: var(--white); }
+.paper .copied { color: var(--black); }
+.button.next { margin-top: 1rem; }
+/* formula cards in equal columns, every card as tall as the tallest, so the formulas and rules line up */
+.boards { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 17rem), 1fr)); grid-auto-rows: 1fr; gap: 1rem; }
+
+/* formula_card on a white board: name, the formula large, a rule, then symbol, meaning, (unit) as in Binas */
+.board { display: flex; flex-direction: column; background: var(--white); color: var(--black); padding: 1.1rem 1.4rem 1.2rem; }
+.board .name { font-weight: 600; margin-bottom: 0.35rem; }
+.board .key { font-size: 1.9rem; margin-bottom: 0.6rem; min-height: 2.4em; display: flex; align-items: center; } /* room for a fraction: the rules line up */
+.board hr { border: 0; border-top: var(--line) solid currentColor; margin: 0 0 0.6rem; }
+.board .source { display: block; margin-top: auto; padding-top: 0.9rem; font-size: var(--s-1); font-weight: 600; }
+.board table { border-collapse: collapse; }
+.board td { padding: 0.12rem 0.9rem 0.12rem 0; hyphens: auto; } /* "vervangings-weerstand" may break: the card stays closed */
+.board td:last-child { padding-right: 0; }
+
+/* ── Text pages ───────────────────────────────────────────────────────────── */
+.text-page h1 { font-size: var(--s4); margin: 2.5rem 0 2rem; }
+.text-page .lead { font: 600 var(--s2)/1.15 var(--display); letter-spacing: -0.01em; max-width: 26ch; margin-bottom: 4.5rem; }
+.paper .text-page { padding-block: 3.5rem; }
+/* a page of topics: the heading on the left, its text on the right, a black rule between them */
+.topic { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 2fr); gap: 0.75rem 3rem; padding-block: 2rem; }
+.topic + .topic { border-top: var(--line) solid var(--black); }
+.topic h2 { font-size: var(--s2); }
+.topic .text { display: grid; gap: 1rem; align-content: start; }
+.text-page .actions { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 2rem; }
+.paper .button.outline { background: none; box-shadow: inset 0 0 0 var(--line) var(--black); }
+.paper .button.outline:hover { background: var(--black); color: var(--white); }
+.board.contact { max-width: 40rem; margin-top: 2rem; }
+.board.contact h2 { font-size: var(--s2); margin-bottom: 0.6rem; }
+.paper .board { background: var(--white); color: var(--black); box-shadow: inset 0 0 0 var(--line) var(--black); } /* formula cards: like the chapter tiles */
+.paper .board.contact { background: var(--black); color: var(--white); box-shadow: none; } /* the contact block stands out */
+.formula-group { padding-block: 2.5rem; }
+.formula-group + .formula-group { border-top: var(--line) solid var(--black); }
+.formula-group h2 { font-size: var(--s3); margin-bottom: 1.5rem; }
+.q { font-style: italic; font-weight: 600; }
+a[href^="mailto:"] { overflow-wrap: anywhere; } /* a long address may break on a phone */
+
+@media (max-width: 52rem) {
+  .row-head, .watch, .chapter-detail, .topic { grid-template-columns: 1fr; }
+  .site-header nav { margin-left: 0; flex-wrap: wrap; }
+}
+@media (max-width: 30rem) {
+  .site-header nav { gap: 0.4rem 1rem; font-size: 0.9375rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  * { transition: none !important; }
+}

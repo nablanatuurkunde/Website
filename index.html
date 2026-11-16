@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Nabla, natuurkunde in beeld</title>
+  <meta name="description" content="Nabla: natuurkundevideo's in het Nederlands, helder uitgelegd met animaties.">
+  <!-- share previews; og:image may need the full address (https://.../assets/og.png) once the site has a domain -->
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="nl_NL">
+  <meta property="og:site_name" content="Nabla">
+  <meta property="og:title" content="Nabla, natuurkunde in beeld">
+  <meta property="og:description" content="Nabla: natuurkundevideo's in het Nederlands, helder uitgelegd met animaties.">
+  <meta property="og:image" content="assets/og.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" href="assets/favicon.png">
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+  <meta name="theme-color" content="#000000">
+  <link rel="preload" href="assets/fonts/bricolage-grotesque.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="assets/fonts/geist.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="assets/katex/katex.min.css">
+  <script defer src="assets/katex/katex.min.js"></script>
+  <link rel="stylesheet" href="css/nabla.css">
+  <script defer src="js/field.js"></script>
+  <script defer src="js/videos.js"></script>
+  <script defer src="js/pages.js"></script>
+  <script defer src="js/intro.js"></script>
+</head>
+<body data-page="home" class="intro">
+  <canvas class="field" aria-hidden="true"></canvas>
+  <header class="site-header wrap">
+    
+    <nav aria-label="Hoofdmenu"><a href="index.html#videos">Video's</a><a href="formules.html">Formules</a><a href="docenten.html">Docenten</a><a href="over.html">Over Nabla</a></nav>
+  </header>
+  <main>
+    <section class="hero wrap">
+      <h1><span class="logo"><span class="sr-only">Nabla</span><img class="word" src="assets/wordmark.png" alt=""><img class="nabla" src="assets/nabla.png" alt=""></span></h1>
+      <div class="after-logo">
+        <p class="tagline">Natuurkunde, helder uitgelegd.</p>
+        <div class="actions">
+          <a class="button" href="#videos">Bekijk de video's</a>
+          <a class="button quiet" href="over.html">Over Nabla</a>
+        </div>
+      </div>
+    </section>
+    <div id="videos" class="paper"></div>
+  </main>
+  <footer class="site-footer wrap">
+    <span>Nabla, natuurkunde in beeld</span>
+    <span class="links"><a href="steun.html">Steun Nabla</a><a href="https://www.youtube.com/" rel="noopener">Nabla op YouTube</a></span>
+  </footer>
+</body>
+</html>
